@@ -37,17 +37,15 @@ const allowedOrigins = [
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
     if (!origin) {
-      // requests like curl / server-to-server (no origin header)
       return callback(null, true);
     }
-
     if (
       allowedOrigins.includes(origin) ||
-      /\.vercel\.app$/.test(origin) // allow Vercel preview deployments
+      /([a-zA-Z0-9-]+\.)*vercel\.app$/.test(new URL(origin).hostname)
     ) {
       callback(null, true);
     } else {
-      callback(null, false); // reject silently (no crash)
+      callback(null, false);
     }
   },
   credentials: true,
