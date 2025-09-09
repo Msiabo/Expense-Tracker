@@ -26,12 +26,10 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(passport.initialize());
 
-app.use(
-  cors({
-    origin: Env.FRONTEND_ORIGIN,
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: ['https://expense-tracker-fvk4.vercel.app'], 
+  credentials: true 
+}));
 
 app.get(
   "/",
