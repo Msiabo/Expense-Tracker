@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --files src/index.ts",
-    "build": "tsc && cpx package.json dist/",
+    "build": "tsc && npx cpx package.json dist/",
     "start": "node dist/index.js"
   },
   "keywords": [],
