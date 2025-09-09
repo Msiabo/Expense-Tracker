@@ -19,6 +19,7 @@ import analyticsRoutes from "./routes/analytics.route";
 
 const app = express();
 const BASE_PATH = Env.BASE_PATH;
+console.log("BASE_PATH:", BASE_PATH);
 
 // Parse JSON + URL Encoded
 app.use(express.json());
