@@ -21,6 +21,19 @@ import analyticsRoutes from "./routes/analytics.route";
 const app = express();
 const BASE_PATH = Env.BASE_PATH;
 
+// Ensure DB connection on first request (for serverless cold starts)
+let dbConnected = false;
+app.use(async (req, res, next) => {
+  if (!dbConnected) {
+    await connctDatabase();
+    dbConnected = true;
+    if (Env.NODE_ENV === "development") {
+      await initializeCrons();
+    }
+  }
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -38,7 +51,7 @@ app.get(
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     throw new BadRequestException("This is a test error");
     res.status(HTTPSTATUS.OK).json({
-      message: "Hello Subcribe to the channel",
+      message: "Hello Subscribe to the channel",
     });
   })
 );
@@ -51,12 +64,5 @@ app.use(`${BASE_PATH}/analytics`, passportAuthenticateJwt, analyticsRoutes);
 
 app.use(errorHandler);
 
-app.listen(Env.PORT, async () => {
-  await connctDatabase();
-
-  if (Env.NODE_ENV === "development") {
-    await initializeCrons();
-  }
-
-  console.log(`Server is running on port ${Env.PORT} in ${Env.NODE_ENV} mode`);
-});
+// For Vercel serverless: export the app, do NOT call app.listen
+export default app;
