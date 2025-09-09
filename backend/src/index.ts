@@ -65,15 +65,7 @@ app.use((req, res, next) => {
 });
 
 // ---------------- Routes ----------------
-app.get(
-  "/",
-  asyncHandler(async (req: Request, res: Response, _next: NextFunction) => {
-    throw new BadRequestException("This is a test error");
-    res.status(HTTPSTATUS.OK).json({
-      message: "Hello Subscribe to the channel",
-    });
-  })
-);
+
 
 app.use(`${BASE_PATH}/auth`, authRoutes);
 //app.use(`${BASE_PATH}/user`, passportAuthenticateJwt, userRoutes);
