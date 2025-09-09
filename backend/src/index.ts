@@ -15,57 +15,63 @@ import userRoutes from "./routes/user.route";
 import transactionRoutes from "./routes/transaction.route";
 import { initializeCrons } from "./cron";
 import reportRoutes from "./routes/report.route";
-import { getDateRange } from "./utils/date";
 import analyticsRoutes from "./routes/analytics.route";
 
 const app = express();
 const BASE_PATH = Env.BASE_PATH;
 
+// Parse JSON + URL Encoded
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Init Passport
 app.use(passport.initialize());
 
+// ---------------- CORS CONFIG ----------------
 const allowedOrigins = [
   "https://expense-tracker-fvk4.vercel.app", // production frontend
-  "http://localhost:5173", // local frontend
+  "http://localhost:5173",                   // local dev
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-// Preflight handling (reuse the same config!)
-app.options("*", cors({
+// Allow production + preview *.vercel.app
+const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) {
+      // requests like curl / server-to-server (no origin header)
+      return callback(null, true);
+    }
+
+    if (
+      allowedOrigins.includes(origin) ||
+      /\.vercel\.app$/.test(origin) // allow Vercel preview deployments
+    ) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      callback(null, false); // reject silently (no crash)
     }
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-}));
+};
 
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+// ------------------------------------------------
+
+// Debug incoming requests (optional, helps verify CORS)
+app.use((req, res, next) => {
+  console.log("Incoming:", req.method, req.path, "Origin:", req.headers.origin);
+  next();
+});
+
+// ---------------- Routes ----------------
 app.get(
   "/",
-  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  asyncHandler(async (req: Request, res: Response, _next: NextFunction) => {
     throw new BadRequestException("This is a test error");
     res.status(HTTPSTATUS.OK).json({
-      message: "Hello Subcribe to the channel",
+      message: "Hello Subscribe to the channel",
     });
   })
 );
@@ -76,8 +82,10 @@ app.use(`${BASE_PATH}/transaction`, passportAuthenticateJwt, transactionRoutes);
 app.use(`${BASE_PATH}/report`, passportAuthenticateJwt, reportRoutes);
 app.use(`${BASE_PATH}/analytics`, passportAuthenticateJwt, analyticsRoutes);
 
+// Error handler
 app.use(errorHandler);
 
+// ---------------- Server Startup ----------------
 app.listen(Env.PORT, async () => {
   await connctDatabase();
 
@@ -85,5 +93,5 @@ app.listen(Env.PORT, async () => {
     await initializeCrons();
   }
 
-  console.log(`Server is running on port ${Env.PORT} in ${Env.NODE_ENV} mode`);
+  console.log(`🚀 Server is running on port ${Env.PORT} in ${Env.NODE_ENV} mode`);
 });
