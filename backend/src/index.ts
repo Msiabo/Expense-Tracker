@@ -76,15 +76,12 @@ app.get(
 );
 
 app.use(`${BASE_PATH}/auth`, authRoutes);
-app.use(`${BASE_PATH}/user`, passportAuthenticateJwt, userRoutes);
-app.use(`${BASE_PATH}/transaction`, passportAuthenticateJwt, transactionRoutes);
-app.use(`${BASE_PATH}/report`, passportAuthenticateJwt, reportRoutes);
-app.use(`${BASE_PATH}/analytics`, passportAuthenticateJwt, analyticsRoutes);
-console.log("Registering:", `${BASE_PATH}/auth`, "with", authRoutes.stack?.map(r => r.route?.path));
-console.log("Registering:", `${BASE_PATH}/user`, "with", userRoutes.stack?.map(r => r.route?.path));
-console.log("Registering:", `${BASE_PATH}/transaction`, "with", transactionRoutes.stack?.map(r => r.route?.path));
-console.log("Registering:", `${BASE_PATH}/report`, "with", reportRoutes.stack?.map(r => r.route?.path));
-console.log("Registering:", `${BASE_PATH}/analytics`, "with", analyticsRoutes.stack?.map(r => r.route?.path));
+//app.use(`${BASE_PATH}/user`, passportAuthenticateJwt, userRoutes);
+//app.use(`${BASE_PATH}/transaction`, passportAuthenticateJwt, transactionRoutes);
+//app.use(`${BASE_PATH}/report`, passportAuthenticateJwt, reportRoutes);
+//app.use(`${BASE_PATH}/analytics`, passportAuthenticateJwt, analyticsRoutes);
+
+
 
 // Error handler
 app.use(errorHandler);
