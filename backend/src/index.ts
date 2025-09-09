@@ -26,18 +26,39 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(passport.initialize());
 
+const allowedOrigins = [
+  "https://expense-tracker-fvk4.vercel.app", // production frontend
+  "http://localhost:5173", // local frontend
+];
+
 app.use(
   cors({
-    origin: ["https://expense-tracker-fvk4.vercel.app"],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// 👇 Handle preflight
-app.options("*", cors());
-
+// Preflight handling (reuse the same config!)
+app.options("*", cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 app.get(
   "/",
